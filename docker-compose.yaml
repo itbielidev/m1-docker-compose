@@ -1,0 +1,56 @@
+version: '3.1'
+
+services:
+  pg_container_motos:
+    image: postgres
+    restart: always
+    container_name: pg_container_motos
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+      POSTGRES_DB: db
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - webnet
+
+  pgadmin4_container_motos:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: pgadmin4_container_motos
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - ./pgadmin-data:/var/lib/pgadmin
+    networks:
+      - webnet
+      
+  webserver:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    container_name: webserver
+    volumes:
+      - ./fotos:/app/fotos
+    ports:
+      - "8100:8100"
+    networks:
+      - webnet
+
+  static:
+    image: nginx
+    container_name: static
+    volumes:
+      - ./fotos:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+    networks:
+      - webnet
+
+networks:
+  webnet:
